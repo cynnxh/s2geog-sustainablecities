@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch3: Case Studies — Ivy's Sustainable Cities Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="citycore.js" defer></script>
+<style>
+  :root{
+    --sky:#7DD3E8; --sky-deep:#1F7A99; --night:#123047;
+    --green:#4CAF6D; --green-deep:#2E8B4F; --gold:#FFC94A; --gold-deep:#F0A400;
+    --coral:#FF6F5E; --coral-deep:#D9483A; --concrete:#B7C4CC; --cream:#F6FAF6; --ink:#123047; --white:#FFFFFF;
+    --model:#1D5FD6; --model-bg:#E9F0FF;
+    --shadow: 0 8px 0 rgba(18,48,71,0.15);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif; color:var(--ink); min-height:100vh; overflow-x:hidden; padding-bottom:110px;
+    background:linear-gradient(180deg, #B9A8E8 0%, #D6CCF0 22%, var(--cream) 100%);}
+  h1,h2,h3,.display{font-family:'Fredoka',sans-serif;}
+  a{color:inherit;}
+
+  header{text-align:center; padding:34px 20px 12px; position:relative; z-index:2;}
+  .eyebrow{display:inline-block; background:var(--white); color:#6A4FC4; font-weight:800; font-size:0.78rem;
+    letter-spacing:0.06em; text-transform:uppercase; padding:6px 16px; border-radius:999px; box-shadow:var(--shadow); margin-bottom:14px;}
+  h1.title{font-size:clamp(1.7rem,5vw,2.6rem); color:var(--white); margin:0 0 8px; text-shadow:0 4px 0 rgba(60,40,100,0.3);}
+  .subtitle{font-weight:700; color:var(--night); max-width:560px; margin:0 auto; font-size:1rem;}
+
+  .stage{max-width:820px; margin:22px auto; padding:0 18px; position:relative; z-index:2;}
+  .case-card{background:var(--white); border-radius:26px; box-shadow:var(--shadow); padding:22px 22px; margin-bottom:22px; border-left:8px solid var(--sky-deep);}
+  .case-card.cape{border-left-color:#C0392B;}
+  .case-card.kranji{border-left-color:#1F7A99;}
+  .case-card.china{border-left-color:#8B5A2B;}
+  .case-card.hdb{border-left-color:var(--green-deep);}
+  .case-head{display:flex; align-items:center; gap:12px; cursor:pointer;}
+  .case-head .flag{font-size:2rem;}
+  .case-head h2{margin:0; font-size:1.2rem; color:var(--night);}
+  .case-head .loc{font-size:0.8rem; font-weight:700; color:#5b7089;}
+  .case-toggle{margin-left:auto; font-family:'Fredoka'; font-weight:600; font-size:0.78rem; color:var(--sky-deep); background:#EAF7FF; padding:6px 12px; border-radius:999px;}
+  .case-body{display:none; margin-top:14px; font-size:0.88rem; line-height:1.6;}
+  .case-body ul{padding-left:20px; margin:8px 0;}
+  .case-body li{margin-bottom:6px;}
+  .model{background:var(--model-bg); border:2px dashed var(--model); border-radius:14px; padding:12px 16px; margin-top:12px; color:var(--model); font-weight:700; font-size:0.85rem;}
+  .model .tag{display:block; font-family:'Fredoka'; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px;}
+
+  /* matching game */
+  .match-card{background:var(--white); border-radius:26px; box-shadow:var(--shadow); padding:24px 22px; margin-bottom:24px;}
+  .match-card h2{text-align:center; color:var(--sky-deep); margin:0 0 4px; font-size:1.3rem;}
+  .match-card p.instr{text-align:center; font-weight:700; color:#5b7089; margin:0 0 16px; font-size:0.9rem;}
+  .match-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap;}
+  .match-city{font-family:'Fredoka'; font-weight:600; font-size:0.85rem; background:#F3F8FC; padding:8px 12px; border-radius:12px; min-width:130px; text-align:center;}
+  select.match-select{flex:1; min-width:180px; padding:8px 10px; border-radius:10px; border:2px solid #DCEBF5; font-family:'Nunito'; font-weight:700; font-size:0.82rem;}
+  .check-btn{display:block; margin:14px auto 0; background:var(--green); color:white; border:none; font-family:'Fredoka'; font-weight:600;
+    padding:10px 26px; border-radius:999px; cursor:pointer; box-shadow:0 4px 0 var(--green-deep);}
+  .match-result{text-align:center; font-family:'Fredoka'; font-weight:600; margin-top:10px; color:var(--sky-deep);}
+  .match-row.correct select{border-color:var(--green); background:#E3F8E9;}
+  .match-row.wrong select{border-color:var(--coral); background:#FDE7E5;}
+
+  .nextchap{display:block; text-align:center; background:var(--sky-deep); color:white; font-family:'Fredoka'; font-weight:600;
+    padding:14px; border-radius:18px; text-decoration:none; margin:10px 0 20px; box-shadow:0 5px 0 #135367;}
+
+  nav.bottom-nav{position:fixed; bottom:0; left:0; right:0; background:var(--night); display:flex; justify-content:center; gap:4px;
+    padding:10px 6px calc(10px + env(safe-area-inset-bottom)); z-index:10; box-shadow:0 -6px 20px rgba(0,0,0,.15); flex-wrap:wrap;}
+  nav.bottom-nav a{display:flex; flex-direction:column; align-items:center; gap:2px; text-decoration:none; color:#9FC4D6;
+    font-family:'Fredoka'; font-size:0.62rem; font-weight:600; padding:6px 8px; border-radius:14px; min-width:52px;}
+  nav.bottom-nav a .dot{font-size:1.25rem;}
+  nav.bottom-nav a.active{background:var(--sky-deep); color:white;}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="eyebrow">Chapter 3 · Memorise These!</span>
+  <h1 class="title">📖 Case Studies</h1>
+  <p class="subtitle">Four real cities, four real problems and solutions. Tap each card to reveal the full story.</p>
+</header>
+
+<div class="stage">
+
+  <div class="case-card cape">
+    <div class="case-head" data-target="body-cape">
+      <span class="flag">🇿🇦</span>
+      <div><h2>Cape Town Water Crisis</h2><div class="loc">South Africa · 2015–2018 drought</div></div>
+      <span class="case-toggle">Tap to reveal</span>
+    </div>
+    <div class="case-body" id="body-cape">
+      <ul>
+        <li>Cape Town suffered a <b>severe drought between 2015 and 2018</b>.</li>
+        <li>In <b>July 2018</b>, taps were turned off for homes and businesses, and water had to be <b>rationed</b> as reservoir levels were dangerously low.</li>
+        <li>The government said it would cut off water supply completely ("Day Zero") if reservoir levels hit <b>13.5%</b>.</li>
+        <li>The crisis was worsened by a <b>growing urban population</b> and <b>poor water consumption habits</b>.</li>
+        <li>The worst case was averted when it rained — by <b>September 2018</b>, reservoir levels rose to almost <b>70%</b> and most restrictions were lifted.</li>
+      </ul>
+      <div class="model"><span class="tag">🔵 Model Answer — Why did the crisis happen?</span>The Cape Town water crisis occurred due to a severe drought combined with a rapidly growing urban population that increased water demand, along with poor water consumption habits among residents, which together caused reservoir levels to fall to dangerously low levels.</div>
+    </div>
+  </div>
+
+  <div class="case-card kranji">
+    <div class="case-head" data-target="body-kranji">
+      <span class="flag">🇸🇬</span>
+      <div><h2>Kranji Reservoir</h2><div class="loc">Singapore · Managing water pollution</div></div>
+      <span class="case-toggle">Tap to reveal</span>
+    </div>
+    <div class="case-body" id="body-kranji">
+      <ul>
+        <li>Kranji Reservoir is located near Singapore's main <b>agricultural area</b>.</li>
+        <li><b>Problem:</b> rainwater mixes with excess fertiliser from farms, and this polluted water flows into the reservoir, harming water quality.</li>
+        <li><b>Solution:</b> drains were constructed around the farms so polluted surface run-off is diverted to <b>treatment ponds</b> instead of straight into the reservoir.</li>
+        <li>Plants such as <b>pandan and cattails</b> are grown on floating wetlands at the edge of the treatment ponds to help purify the water naturally.</li>
+        <li>This is hoped to improve water quality in Kranji Reservoir over time.</li>
+      </ul>
+      <div class="model"><span class="tag">🔵 Model Answer — How is water pollution managed at Kranji Reservoir?</span>Cut-off drains were built around the farms to channel polluted run-off (containing excess fertiliser) into treatment ponds instead of the reservoir. Floating wetlands planted with pandan and cattails at the ponds help to naturally filter and purify the water before it enters the reservoir, improving overall water quality.</div>
+    </div>
+  </div>
+
+  <div class="case-card china">
+    <div class="case-head" data-target="body-china">
+      <span class="flag">🇨🇳</span>
+      <div><h2>China's Clean Air Laws</h2><div class="loc">Beijing, Tianjin & Hebei · Managing air pollution</div></div>
+      <span class="case-toggle">Tap to reveal</span>
+    </div>
+    <div class="case-body" id="body-china">
+      <ul>
+        <li>Cities in China suffered serious air pollution from <b>industrial activities and vehicular emissions</b>.</li>
+        <li>In <b>2013</b>, China implemented the <b>Air Pollution Prevention and Control Action Plan</b> for Beijing, Tianjin and Hebei.</li>
+        <li>The plan lets cities <b>regulate the actions of citizens and industries</b>.</li>
+        <li>A <b>license plate lottery policy</b> was introduced, limiting the number of new vehicle registrations.</li>
+        <li><b>Vehicle restriction rules</b> were also rolled out — limiting private car use to selected days of the week, based on the last digit of the license plate.</li>
+      </ul>
+      <div class="model"><span class="tag">🔵 Model Answer — How does China manage air pollution?</span>China introduced the Air Pollution Prevention and Control Action Plan (2013) to regulate citizens and industries in Beijing, Tianjin and Hebei. This included a license plate lottery to limit new vehicle registrations, and vehicle restriction rules that limit private cars to selected days based on their license plate numbers — reducing the number of vehicles on the road and vehicular emissions.</div>
+    </div>
+  </div>
+
+  <div class="case-card hdb">
+    <div class="case-head" data-target="body-hdb">
+      <span class="flag">🇸🇬</span>
+      <div><h2>Singapore's Housing Story</h2><div class="loc">Singapore · From squatters to HDB flats</div></div>
+      <span class="case-toggle">Tap to reveal</span>
+    </div>
+    <div class="case-body" id="body-hdb">
+      <ul>
+        <li>In the <b>1950s–1960s</b>, Singapore had a housing shortage. Large numbers of people lived in <b>squatter settlements</b>.</li>
+        <li>Squatter settlements had a <b>low standard of living</b>: no running water/electricity, poor sanitation, overcrowding, and diseases spread easily.</li>
+        <li>These settlements developed due to <b>rapid population growth</b> — caused by both natural increase and migration.</li>
+        <li>The <b>Singapore Improvement Trust</b>, later succeeded by the <b>Housing & Development Board (HDB)</b>, solved the problem by building <b>affordable public housing</b> and resettling squatters.</li>
+        <li>By <b>2020, over 80%</b> of Singapore's population lived in HDB-built homes, often surrounded by good amenities — schools, shopping malls, recreational parks and healthcare providers.</li>
+      </ul>
+      <div class="model"><span class="tag">🔵 Model Answer — How did Singapore solve its housing problem?</span>Singapore's housing shortage in the 1950s–60s led to overcrowded, unsanitary squatter settlements caused by rapid population growth. The Singapore Improvement Trust, later replaced by the Housing & Development Board (HDB), addressed this by building affordable public housing and resettling squatters. By 2020, over 80% of Singaporeans lived in HDB flats with good access to amenities such as schools, malls and healthcare, greatly improving quality of life.</div>
+    </div>
+  </div>
+
+  <div class="match-card">
+    <h2>🎮 Match the Case Study</h2>
+    <p class="instr">Match each key fact to the correct case study, then tap Check!</p>
+    <div id="matchList"></div>
+    <button class="check-btn" id="checkBtn">Check Answers ✓</button>
+    <div class="match-result" id="matchResult"></div>
+  </div>
+
+  <a class="nextchap" href="04_hazards_and_qol.html">Continue to Chapter 4: Hazards & Quality of Life ▶</a>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html"><span class="dot">🏠</span>Home</a>
+  <a href="01_cities_and_people.html"><span class="dot">🏙️</span>Ch1</a>
+  <a href="02_opportunities_challenges.html"><span class="dot">⚖️</span>Ch2</a>
+  <a class="active" href="03_case_studies.html"><span class="dot">📖</span>Ch3</a>
+  <a href="04_hazards_and_qol.html"><span class="dot">🛡️</span>Ch4</a>
+  <a href="05_recap.html"><span class="dot">⭐</span>Recap</a>
+  <a href="06_question_bank.html"><span class="dot">📚</span>Bank</a>
+  <a href="07_active_recall.html"><span class="dot">🧠</span>Recall</a>
+</nav>
+
+<script>
+(function(){
+  document.querySelectorAll('.case-head').forEach(h=>{
+    h.addEventListener('click', ()=>{
+      const body = document.getElementById(h.dataset.target);
+      const open = body.style.display === 'block';
+      body.style.display = open ? 'none' : 'block';
+      h.querySelector('.case-toggle').textContent = open ? 'Tap to reveal' : 'Tap to hide';
+    });
+  });
+
+  const facts = [
+    {text:'"Day Zero" would happen if reservoir levels hit 13.5%', answer:'cape'},
+    {text:'Pandan and cattails grown on floating wetlands to purify water', answer:'kranji'},
+    {text:'License plate lottery limits new vehicle registrations', answer:'china'},
+    {text:'Housing & Development Board resettled squatters into public flats', answer:'hdb'},
+    {text:'Drought lasted from 2015 to 2018', answer:'cape'},
+    {text:'Cut-off drains divert farm run-off to treatment ponds', answer:'kranji'}
+  ];
+  const options = [
+    {v:'cape', l:'Cape Town Water Crisis'},
+    {v:'kranji', l:'Kranji Reservoir'},
+    {v:'china', l:'China Clean Air Laws'},
+    {v:'hdb', l:'Singapore Housing (HDB)'}
+  ];
+  const list = document.getElementById('matchList');
+  facts.forEach((f,i)=>{
+    const row = document.createElement('div'); row.className='match-row'; row.dataset.answer=f.answer;
+    const city = document.createElement('div'); city.className='match-city'; city.textContent = f.text;
+    const sel = document.createElement('select'); sel.className='match-select';
+    const def = document.createElement('option'); def.value=''; def.textContent='Choose case study...'; sel.appendChild(def);
+    options.forEach(o=>{ const op=document.createElement('option'); op.value=o.v; op.textContent=o.l; sel.appendChild(op); });
+    row.appendChild(city); row.appendChild(sel); list.appendChild(row);
+  });
+  document.getElementById('checkBtn').addEventListener('click', ()=>{
+    let correct=0;
+    document.querySelectorAll('.match-row').forEach(row=>{
+      const sel = row.querySelector('select');
+      row.classList.remove('correct','wrong');
+      if(sel.value === row.dataset.answer){ row.classList.add('correct'); correct++; }
+      else { row.classList.add('wrong'); }
+    });
+    document.getElementById('matchResult').textContent = `You matched ${correct} / ${facts.length} correctly!`;
+    if(window.CityProgress && correct>0) window.CityProgress.add(correct);
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Question Bank — Ivy's Sustainable Cities Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="citycore.js" defer></script>
+<style>
+  :root{
+    --sky:#7DD3E8; --sky-deep:#1F7A99; --night:#123047;
+    --green:#4CAF6D; --green-deep:#2E8B4F; --gold:#FFC94A; --gold-deep:#F0A400;
+    --coral:#FF6F5E; --coral-deep:#D9483A; --concrete:#B7C4CC; --cream:#F6FAF6; --ink:#123047; --white:#FFFFFF;
+    --model:#1D5FD6; --model-bg:#E9F0FF;
+    --shadow: 0 8px 0 rgba(18,48,71,0.15);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif; color:var(--ink); min-height:100vh; overflow-x:hidden; padding-bottom:110px;
+    background:linear-gradient(180deg, #6FCF97 0%, #A9E4C4 22%, var(--cream) 100%);}
+  h1,h2,h3,.display{font-family:'Fredoka',sans-serif;}
+  a{color:inherit;}
+
+  header{text-align:center; padding:34px 20px 12px; position:relative; z-index:2;}
+  .eyebrow{display:inline-block; background:var(--white); color:var(--green-deep); font-weight:800; font-size:0.78rem;
+    letter-spacing:0.06em; text-transform:uppercase; padding:6px 16px; border-radius:999px; box-shadow:var(--shadow); margin-bottom:14px;}
+  h1.title{font-size:clamp(1.7rem,5vw,2.6rem); color:var(--white); margin:0 0 8px; text-shadow:0 4px 0 rgba(18,48,71,0.25);}
+  .subtitle{font-weight:700; color:var(--night); max-width:580px; margin:0 auto; font-size:1rem;}
+
+  .stage{max-width:820px; margin:22px auto; padding:0 18px; position:relative; z-index:2;}
+
+  /* control bar */
+  .control-card{background:var(--white); border-radius:24px; box-shadow:var(--shadow); padding:18px 20px; margin-bottom:20px;
+    position:sticky; top:10px; z-index:5;}
+  .filter-row{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;}
+  .filter-btn{background:#F3F8FC; border:2px solid #DCEBF5; border-radius:999px; padding:8px 16px; cursor:pointer;
+    font-family:'Fredoka'; font-weight:600; font-size:0.8rem; color:var(--sky-deep);}
+  .filter-btn.active{background:var(--sky-deep); color:white; border-color:#135367;}
+  .stat-row{display:flex; justify-content:center; gap:18px; flex-wrap:wrap; font-family:'Fredoka'; font-weight:600; font-size:0.85rem; color:var(--night);}
+  .stat-row span{background:#F8FAFC; padding:6px 14px; border-radius:999px;}
+  .stat-row .sc-correct{color:var(--green-deep);}
+  .stat-row .sc-wrong{color:var(--coral-deep);}
+  .reset-btn{display:block; margin:12px auto 0; background:var(--coral-deep); color:white; border:none; font-family:'Fredoka';
+    font-weight:600; font-size:0.78rem; padding:8px 18px; border-radius:999px; cursor:pointer;}
+
+  /* question cards */
+  .qbank-list{display:flex; flex-direction:column; gap:16px;}
+  .qcard{background:var(--white); border-radius:20px; box-shadow:var(--shadow); padding:18px 20px; border-left:7px solid var(--sky-deep);}
+  .qcard[data-chapter="1"]{border-left-color:#1F7A99;}
+  .qcard[data-chapter="2"]{border-left-color:#F0A400;}
+  .qcard[data-chapter="3"]{border-left-color:#6A4FC4;}
+  .qcard[data-chapter="4"]{border-left-color:#D9483A;}
+  .qmeta{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .qtag{font-family:'Fredoka'; font-weight:600; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.03em; color:#8298ad;}
+  .qnum{font-family:'Fredoka'; font-weight:700; font-size:0.8rem; color:var(--night); background:#F3F8FC; border-radius:999px; padding:2px 10px;}
+  .qtext{font-weight:800; font-size:0.95rem; margin-bottom:12px; line-height:1.4;}
+  .opts{display:grid; gap:8px;}
+  .opt{text-align:left; background:#F3F8FC; border:2px solid #E1EEF6; border-radius:14px; padding:10px 14px;
+    font-weight:700; font-family:'Nunito'; cursor:pointer; font-size:0.87rem; color:var(--ink);}
+  .opt.correct{background:#E3F8E9; border-color:var(--green); color:#217a3b;}
+  .opt.wrong{background:#FDE7E5; border-color:var(--coral); color:#b3392c;}
+  .opt[disabled]{cursor:default;}
+  .qexplain{display:none; margin-top:10px; background:var(--model-bg); border:2px dashed var(--model); border-radius:12px;
+    padding:10px 14px; font-size:0.8rem; font-weight:700; color:var(--model);}
+
+  .empty-msg{text-align:center; font-weight:700; color:#5b7089; padding:30px;}
+
+  .summary-card{display:none; background:linear-gradient(135deg,#FFF7DC,#EAF7FF); border:4px solid var(--gold); border-radius:24px;
+    padding:26px; text-align:center; margin-top:20px; box-shadow:var(--shadow);}
+  .summary-card .big{font-size:2.4rem;}
+  .summary-card h3{color:var(--sky-deep); margin:6px 0;}
+
+  nav.bottom-nav{position:fixed; bottom:0; left:0; right:0; background:var(--night); display:flex; justify-content:center; gap:4px;
+    padding:10px 6px calc(10px + env(safe-area-inset-bottom)); z-index:10; box-shadow:0 -6px 20px rgba(0,0,0,.15); flex-wrap:wrap;}
+  nav.bottom-nav a{display:flex; flex-direction:column; align-items:center; gap:2px; text-decoration:none; color:#9FC4D6;
+    font-family:'Fredoka'; font-size:0.6rem; font-weight:600; padding:6px 7px; border-radius:14px; min-width:48px;}
+  nav.bottom-nav a .dot{font-size:1.2rem;}
+  nav.bottom-nav a.active{background:var(--sky-deep); color:white;}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="eyebrow">Practice · MCQ Question Bank</span>
+  <h1 class="title">📚 Question Bank</h1>
+  <p class="subtitle">40 practice MCQs covering everything from Chapters 1–4. Filter by topic, answer at your own pace, and check your running score.</p>
+</header>
+
+<div class="stage">
+
+  <div class="control-card">
+    <div class="filter-row" id="filterRow">
+      <button class="filter-btn active" data-filter="all">All (40)</button>
+      <button class="filter-btn" data-filter="1">Ch1 · Cities & People</button>
+      <button class="filter-btn" data-filter="2">Ch2 · Opportunities & Challenges</button>
+      <button class="filter-btn" data-filter="3">Ch3 · Case Studies</button>
+      <button class="filter-btn" data-filter="4">Ch4 · Hazards & QoL</button>
+    </div>
+    <div class="stat-row">
+      <span>Answered: <b id="statAnswered">0</b> / <b id="statTotal">40</b></span>
+      <span class="sc-correct">✅ Correct: <b id="statCorrect">0</b></span>
+      <span class="sc-wrong">❌ Wrong: <b id="statWrong">0</b></span>
+    </div>
+    <button class="reset-btn" id="resetBtn">Reset All Answers 🔁</button>
+  </div>
+
+  <div class="qbank-list" id="qbankList"></div>
+  <p class="empty-msg" id="emptyMsg" style="display:none;">No questions in this filter.</p>
+
+  <div class="summary-card" id="summaryCard">
+    <div class="big">🎉</div>
+    <h3>All 40 questions answered!</h3>
+    <p id="summaryText" style="font-weight:700; color:#5b7089;"></p>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html"><span class="dot">🏠</span>Home</a>
+  <a href="01_cities_and_people.html"><span class="dot">🏙️</span>Ch1</a>
+  <a href="02_opportunities_challenges.html"><span class="dot">⚖️</span>Ch2</a>
+  <a href="03_case_studies.html"><span class="dot">📖</span>Ch3</a>
+  <a href="04_hazards_and_qol.html"><span class="dot">🛡️</span>Ch4</a>
+  <a href="05_recap.html"><span class="dot">⭐</span>Recap</a>
+  <a class="active" href="06_question_bank.html"><span class="dot">📚</span>Bank</a>
+  <a href="07_active_recall.html"><span class="dot">🧠</span>Recall</a>
+</nav>
+
+<script>
+(function(){
+  const questions = [
+    // ---- Chapter 1: Cities & People ----
+    {ch:1, q:'Which of these is NOT one of the four key characteristics of a city?', opts:['Large population size','High population density','Low rainfall','Variety of functions and services'], correct:2, note:'A city is defined by population size, density, built-up area, and functions/services — not climate.'},
+    {ch:1, q:'Settlements are ranked, from largest to smallest, as:', opts:['Cities → large towns → small towns → villages → hamlets → isolated houses','Villages → cities → hamlets → towns','Hamlets → cities → towns → villages','Isolated houses → cities → villages → towns'], correct:0, note:'This is the settlement hierarchy — population size, density, built-up area, functions & services all decrease down the hierarchy.'},
+    {ch:1, q:'Population density is calculated as:', opts:['Land area ÷ number of people','Number of people ÷ land area','Number of people × land area','Number of people − land area'], correct:1, note:'Density = people per unit of land area.'},
+    {ch:1, q:'"Rural-urban migration" refers to:', opts:['People moving from one city to another','People moving from the countryside to cities','People moving from cities back to the countryside','Goods moving between countries'], correct:1},
+    {ch:1, q:'"Better job opportunities" is an example of a...', opts:['Push factor','Pull factor','Land use factor','Population density factor'], correct:1},
+    {ch:1, q:'Which of these is a PUSH factor for migration?', opts:['Peace and stability','War or unstable government','Better range of services','To live near family'], correct:1},
+    {ch:1, q:'Urban-to-rural migration is most likely chosen by people who...', opts:['Want higher pollution levels','Have remote working arrangements and want a slower pace of life','Want to lose their job','Dislike having any income'], correct:1},
+    {ch:1, q:'Rural areas mainly rely on which type of economic activity?', opts:['Tertiary industries like banking','Primary industries like farming and mining','Space technology','Casino industries'], correct:1},
+    {ch:1, q:'How do rural farmers benefit from selling food to cities?', opts:['They lose their farmland','They gain an income','They gain more rainfall','They gain a lower population'], correct:1},
+    {ch:1, q:'Compared to rural areas, urban infrastructure is generally...', opts:['Simpler, with limited public transport','More extensive, with well-connected public transport and sewage systems','Non-existent','Identical to rural areas'], correct:1},
+
+    // ---- Chapter 2: Opportunities & Challenges ----
+    {ch:2, q:'Institutes of higher learning such as universities and polytechnics are commonly found in...', opts:['Hamlets','Cities','Isolated farms','Deserts only'], correct:1},
+    {ch:2, q:'Why are cities considered hubs for innovation?', opts:['They have fewer people','They bring knowledgeable and skilled people together, creating an ecosystem for new ideas','They have no infrastructure','They ban new technology'], correct:1},
+    {ch:2, q:'Singapore\'s "Cooler Calmer Singapore" project aims to...', opts:['Increase carbon emissions','Generate design ideas to help people live comfortably without increasing carbon emissions','Reduce the number of universities','Remove all public transport'], correct:1, note:'A project by Singapore\'s Future Cities Laboratory.'},
+    {ch:2, q:'Which gas is NOT typically produced by fossil fuel usage in cities?', opts:['Carbon dioxide','Sulphur dioxide','Nitrogen oxides','Oxygen'], correct:3},
+    {ch:2, q:'A common cause of water pollution in cities is:', opts:['Too much recycling','Improper disposal of waste from households and industries','Excessive tree planting','Low population density'], correct:1},
+    {ch:2, q:'Broken or leaking sewage pipes are most likely to cause:', opts:['Air pollution','Water pollution','Soil erosion only','Noise pollution'], correct:1},
+    {ch:2, q:'Long-term exposure to air pollution is linked to:', opts:['Improved immunity','Respiratory illnesses such as asthma and lung cancer','Better cardiovascular health','No health impact'], correct:1},
+    {ch:2, q:'Soil contamination can occur when:', opts:['Solid waste is properly recycled','Man-made chemicals/solid waste are improperly disposed of, leaching toxic substances into soil','Farmers rotate their crops','Cities plant more trees'], correct:1},
+    {ch:2, q:'As cities grow, competition for LAND mainly happens because:', opts:['Cities have too much unused land','A growing population needs more land for housing and industries, causing urban expansion','Land becomes worthless','Nobody wants to live in cities'], correct:1},
+    {ch:2, q:'Why does urban growth increase competition for WATER?', opts:['Cities need less water as they grow','A continual water supply is needed, but limited land constrains reservoir expansion and reduces water catchment','Water is unlimited in cities','Rainfall always increases in cities'], correct:1},
+
+    // ---- Chapter 3: Case Studies ----
+    {ch:3, q:'The Cape Town water crisis (2015–2018) was caused by:', opts:['A severe drought combined with a growing population and poor water consumption habits','A sudden increase in rainfall','A new reservoir being built too quickly','A decrease in population'], correct:0},
+    {ch:3, q:'Cape Town\'s government said it would cut off water supply completely ("Day Zero") if reservoir levels hit:', opts:['50%','30%','13.5%','70%'], correct:2},
+    {ch:3, q:'The Cape Town crisis eased because:', opts:['A desalination plant was built overnight','Rain fell and reservoir levels rose to nearly 70% by September 2018','The city banned all water use','Businesses closed permanently'], correct:1},
+    {ch:3, q:'Kranji Reservoir\'s water pollution problem was mainly caused by:', opts:['Ocean tides','Excess fertiliser from nearby farms mixing with rainwater run-off','Industrial oil spills','Volcanic ash'], correct:1},
+    {ch:3, q:'At Kranji Reservoir, polluted surface run-off is diverted to:', opts:['The open sea','Treatment ponds','Nearby schools','Underground tunnels only'], correct:1},
+    {ch:3, q:'Which plants are grown on floating wetlands to help purify water at Kranji Reservoir?', opts:['Roses and tulips','Pandan and cattails','Cactus and bamboo','Seaweed and coral'], correct:1},
+    {ch:3, q:'China\'s 2013 Air Pollution Prevention and Control Action Plan applies to which cities?', opts:['Shanghai and Guangzhou','Beijing, Tianjin and Hebei','Hong Kong only','All cities worldwide'], correct:1},
+    {ch:3, q:'China\'s license plate lottery policy is designed to:', opts:['Increase the number of new vehicles','Limit the number of new vehicle registrations','Ban all private cars immediately','Reward drivers with free fuel'], correct:1},
+    {ch:3, q:'China\'s vehicle restriction rules limit private car use based on:', opts:['The car\'s colour','The last digit of the license plate','The driver\'s income','The car\'s age'], correct:1},
+    {ch:3, q:'In 1950s–60s Singapore, squatter settlements developed mainly due to:', opts:['Too few people wanting housing','Rapid population growth from natural increase and migration, causing a housing shortage','Excess government housing','A sudden drop in migration'], correct:1},
+    {ch:3, q:'Which organisation eventually solved Singapore\'s squatter housing problem?', opts:['Ministry of Manpower','Housing & Development Board (HDB)','Land Transport Authority','National Environment Agency'], correct:1},
+    {ch:3, q:'By 2020, roughly what percentage of Singapore\'s population lived in HDB-built homes?', opts:['Over 80%','About 20%','Exactly 50%','Less than 10%'], correct:0},
+    {ch:3, q:'Squatter settlements were typically characterised by:', opts:['Running water and electricity for all','No running water/electricity, poor sanitation and overcrowding','Extremely low population density','Excellent healthcare access'], correct:1},
+
+    // ---- Chapter 4: Hazards & Quality of Life ----
+    {ch:4, q:'The 2020 Beirut port explosion is an example of a:', opts:['Natural hazard','Human-induced hazard','Weather pattern','Population trend'], correct:1},
+    {ch:4, q:'The 2020 Typhoon Goni is an example of a:', opts:['Human-induced hazard','Natural hazard','Industrial accident','Oil spill'], correct:1},
+    {ch:4, q:'A hazard becomes a "disaster" when:', opts:['It rains heavily','People are impacted','It happens at night','Nobody notices it'], correct:1},
+    {ch:4, q:'Cities are considered potential disaster zones mainly because of:', opts:['Low population and low density','Large population, high density and large built-up areas','A complete lack of infrastructure','Being located only in rural regions'], correct:1},
+    {ch:4, q:'Which is NOT typically counted as part of the human cost of a disaster?', opts:['Lives lost','Mental health of survivors','Cost of rebuilding','Increase in tourism revenue'], correct:3},
+    {ch:4, q:'A possible BENEFIT that can follow a natural disaster is:', opts:['Permanent economic collapse','Stronger community bonds and possible economic boom from rebuilding','Total and permanent loss of population','No change to the area at all'], correct:1},
+    {ch:4, q:'Land use planning agencies help manage hazards by:', opts:['Allowing any development anywhere','Assessing if land is suitable and denying permission near danger zones (e.g. active fault lines)','Removing all housing','Ignoring natural hazard risks'], correct:1},
+    {ch:4, q:'Quality of life is best described as:', opts:['Only how much money a person earns','An individual\'s overall well-being, including physical/mental health, independence and relationships','The size of a person\'s house only','A country\'s GDP'], correct:1},
+    {ch:4, q:'A variety of transportation modes benefits a city because it:', opts:['Increases congestion on purpose','Gives people options, can reduce congestion, and some modes reduce pollution','Removes all forms of public transport','Forces everyone to use one mode only'], correct:1},
+    {ch:4, q:'When housing supply is insufficient or too costly, some people may resort to:', opts:['Building squatter settlements on land without permission','Immediately buying larger homes','Moving to villages only','Reducing city population instantly'], correct:0}
+  ];
+
+  const list = document.getElementById('qbankList');
+  const emptyMsg = document.getElementById('emptyMsg');
+  const summaryCard = document.getElementById('summaryCard');
+  const summaryText = document.getElementById('summaryText');
+  let answeredCount=0, correctCount=0, wrongCount=0;
+  const total = questions.length;
+  document.getElementById('statTotal').textContent = total;
+
+  function updateStats(){
+    document.getElementById('statAnswered').textContent = answeredCount;
+    document.getElementById('statCorrect').textContent = correctCount;
+    document.getElementById('statWrong').textContent = wrongCount;
+    if(answeredCount === total){
+      summaryCard.style.display='block';
+      const pct = Math.round((correctCount/total)*100);
+      summaryText.textContent = `You scored ${correctCount} / ${total} (${pct}%). ` +
+        (pct>=80 ? "Excellent — you're exam ready! 🌟" : pct>=55 ? "Good work — review the ones you missed." : "Keep practising — revisit the chapters and try again.");
+    } else {
+      summaryCard.style.display='none';
+    }
+  }
+
+  function buildCard(item, index){
+    const card = document.createElement('div');
+    card.className='qcard';
+    card.dataset.chapter = item.ch;
+    const chNames = {1:'Ch1 · Cities & People', 2:'Ch2 · Opportunities & Challenges', 3:'Ch3 · Case Studies', 4:'Ch4 · Hazards & QoL'};
+    card.innerHTML = `
+      <div class="qmeta">
+        <span class="qtag">${chNames[item.ch]}</span>
+        <span class="qnum">Q${index+1}</span>
+      </div>
+      <div class="qtext">${item.q}</div>
+      <div class="opts"></div>
+      <div class="qexplain">${item.note ? '💡 ' + item.note : ''}</div>
+    `;
+    const optsDiv = card.querySelector('.opts');
+    let answered=false;
+    item.opts.forEach((opt,oi)=>{
+      const btn=document.createElement('button'); btn.className='opt'; btn.textContent=opt;
+      btn.addEventListener('click', ()=>{
+        if(answered) return;
+        answered=true;
+        const all = optsDiv.querySelectorAll('.opt');
+        all.forEach(o=>o.disabled=true);
+        if(oi===item.correct){
+          btn.classList.add('correct');
+          correctCount++;
+          if(window.CityProgress) window.CityProgress.add(1);
+        } else {
+          btn.classList.add('wrong');
+          all[item.correct].classList.add('correct');
+          wrongCount++;
+        }
+        answeredCount++;
+        if(item.note) card.querySelector('.qexplain').style.display='block';
+        updateStats();
+      });
+      optsDiv.appendChild(btn);
+    });
+    return card;
+  }
+
+  questions.forEach((item,i) => list.appendChild(buildCard(item,i)));
+
+  document.querySelectorAll('.filter-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      const cards = document.querySelectorAll('.qcard');
+      let visible=0;
+      cards.forEach(c=>{
+        const show = f==='all' || c.dataset.chapter===f;
+        c.style.display = show ? 'block' : 'none';
+        if(show) visible++;
+      });
+      emptyMsg.style.display = visible===0 ? 'block' : 'none';
+    });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    list.innerHTML='';
+    answeredCount=0; correctCount=0; wrongCount=0;
+    questions.forEach((item,i) => list.appendChild(buildCard(item,i)));
+    updateStats();
+    document.querySelector('.filter-btn[data-filter="all"]').click();
+  });
+})();
+</script>
+
+</body>
+</html>
