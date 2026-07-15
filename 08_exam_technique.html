@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Technique Trainer — Ivy's Sustainable Cities Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="citycore.js"></script>
+<style>
+  :root{
+    --sky:#7DD3E8; --sky-deep:#1F7A99; --night:#123047;
+    --green:#4CAF6D; --green-deep:#2E8B4F; --gold:#FFC94A; --gold-deep:#F0A400;
+    --coral:#FF6F5E; --coral-deep:#D9483A; --concrete:#B7C4CC; --cream:#F6FAF6; --ink:#123047; --white:#FFFFFF;
+    --model:#1D5FD6; --model-bg:#E9F0FF;
+    --teal:#2F9E8F; --teal-deep:#1F7466; --amber:#FFB020; --amber-deep:#D68900;
+    --shadow: 0 8px 0 rgba(18,48,71,0.15);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif; color:var(--ink); min-height:100vh; overflow-x:hidden; padding-bottom:110px;
+    background:linear-gradient(180deg, #123047 0%, #1F5B66 22%, var(--cream) 55%);}
+  h1,h2,h3,.display{font-family:'Fredoka',sans-serif;}
+  a{color:inherit;}
+
+  header{text-align:center; padding:34px 20px 12px; position:relative; z-index:2;}
+  .eyebrow{display:inline-block; background:var(--white); color:var(--teal-deep); font-weight:800; font-size:0.78rem;
+    letter-spacing:0.06em; text-transform:uppercase; padding:6px 16px; border-radius:999px; box-shadow:var(--shadow); margin-bottom:14px;}
+  h1.title{font-size:clamp(1.7rem,5vw,2.6rem); color:var(--white); margin:0 0 8px; text-shadow:0 4px 0 rgba(0,0,0,0.25);}
+  .subtitle{font-weight:700; color:var(--white); opacity:0.92; max-width:600px; margin:0 auto; font-size:1rem;}
+
+  .stage{max-width:820px; margin:22px auto; padding:0 18px; position:relative; z-index:2;}
+
+  .mode-tabs{display:flex; gap:8px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; position:sticky; top:10px; z-index:5;}
+  .mode-tab{background:var(--white); border:2px solid #D8E9E6; border-radius:999px; padding:10px 18px; cursor:pointer;
+    font-family:'Fredoka'; font-weight:600; font-size:0.85rem; color:var(--teal-deep); box-shadow:var(--shadow);}
+  .mode-tab.active{background:var(--teal-deep); color:white; border-color:var(--teal-deep);}
+  .mode-panel{display:none;}
+  .mode-panel.active{display:block;}
+
+  .why-box{background:var(--model-bg); border:2px dashed var(--model); border-radius:16px; padding:14px 18px; margin-bottom:20px;
+    font-weight:700; font-size:0.85rem; color:var(--model); text-align:center;}
+
+  /* ---------- COMMAND WORD CARDS ---------- */
+  .cw-card{background:var(--white); border-radius:26px; box-shadow:var(--shadow); padding:24px 22px; margin-bottom:24px;}
+  .cw-card h2{text-align:center; color:var(--teal-deep); margin:0 0 4px; font-size:1.3rem;}
+  .cw-card p.instr{text-align:center; font-weight:700; color:#5b7089; margin:0 0 16px; font-size:0.9rem;}
+  .cw-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;}
+  .cw-flip{perspective:900px; height:150px; cursor:pointer;}
+  .cw-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+  .cw-flip.flipped .cw-inner{transform:rotateY(180deg);}
+  .cw-face{position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:12px; text-align:center;}
+  .cw-front{background:#EAF6F3; border:2px solid #CDEAE3;}
+  .cw-front .word{font-family:'Fredoka'; font-weight:700; font-size:1.1rem; color:var(--teal-deep);}
+  .cw-front .hint{margin-top:8px; font-size:0.72rem; font-weight:700; color:#7fa89f;}
+  .cw-back{background:var(--teal-deep); color:white; transform:rotateY(180deg); font-weight:700; font-size:0.76rem; line-height:1.4;}
+
+  /* ---------- SPOT THE COMMAND WORD QUIZ ---------- */
+  .q{margin-bottom:20px;}
+  .q .qtext{font-weight:800; margin-bottom:10px; font-size:0.95rem; background:#F3F8FC; border-left:4px solid var(--teal-deep); padding:10px 14px; border-radius:8px;}
+  .opts{display:grid; gap:8px;}
+  .opt{text-align:left; background:#F3F8FC; border:2px solid #E1EEF6; border-radius:14px; padding:10px 14px;
+    font-weight:700; font-family:'Nunito'; cursor:pointer; font-size:0.87rem; color:var(--ink);}
+  .opt.correct{background:#E3F8E9; border-color:var(--green); color:#217a3b;}
+  .opt.wrong{background:#FDE7E5; border-color:var(--coral); color:#b3392c;}
+  .opt[disabled]{cursor:default;}
+  .score-line{text-align:center; font-family:'Fredoka'; font-weight:600; color:var(--teal-deep); margin-top:6px;}
+
+  /* ---------- MARK-SCHEME SELF-CHECK ---------- */
+  .howmarks{background:#FFF7E4; border-left:5px solid var(--amber-deep); border-radius:12px; padding:14px 18px; font-size:0.85rem; font-weight:700; margin-bottom:20px;}
+  .ms-card{background:var(--white); border-radius:22px; box-shadow:var(--shadow); padding:20px 22px; margin-bottom:20px; border-left:7px solid var(--teal-deep);}
+  .ms-meta{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .ms-tag{font-family:'Fredoka'; font-weight:600; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.03em; color:#8298ad;}
+  .ms-marks{font-family:'Fredoka'; font-weight:700; font-size:0.78rem; color:var(--amber-deep); background:#FFF3DA; padding:3px 10px; border-radius:999px;}
+  .ms-qtext{font-weight:800; font-size:0.95rem; margin:6px 0 10px;}
+  .ms-card textarea{width:100%; min-height:70px; border:2px solid #DCEBF5; border-radius:12px; padding:10px; font-family:'Nunito'; font-size:0.85rem; resize:vertical;}
+  .ms-calc-row{display:flex; gap:8px; align-items:center; margin:8px 0; flex-wrap:wrap;}
+  .ms-calc-row input{padding:8px 10px; border-radius:10px; border:2px solid #DCEBF5; font-family:'Nunito'; font-weight:700; width:130px;}
+  .ms-calc-check{background:var(--green); color:white; border:none; font-family:'Fredoka'; font-weight:600; padding:8px 16px; border-radius:999px; cursor:pointer;}
+  .ms-calc-fb{font-family:'Fredoka'; font-weight:600; margin-top:6px; font-size:0.85rem;}
+  .ms-reveal{margin-top:10px; background:var(--teal-deep); color:white; border:none; font-family:'Fredoka'; font-weight:600; font-size:0.82rem;
+    padding:9px 18px; border-radius:999px; cursor:pointer;}
+  .ms-scheme{display:none; margin-top:12px; background:#EAF6F3; border:2px dashed var(--teal); border-radius:14px; padding:14px 18px;}
+  .ms-scheme .tag{display:block; font-family:'Fredoka'; font-weight:600; font-size:0.72rem; text-transform:uppercase; color:var(--teal-deep); margin-bottom:8px;}
+  .ms-scheme label{display:flex; align-items:flex-start; gap:8px; font-size:0.82rem; font-weight:700; margin-bottom:8px; cursor:pointer; line-height:1.4;}
+  .ms-scheme input[type=checkbox]{margin-top:3px;}
+  .ms-scheme-score{font-family:'Fredoka'; font-weight:600; color:var(--teal-deep); margin-top:8px; font-size:0.85rem;}
+  .ms-model{margin-top:10px; background:var(--model-bg); border:2px dashed var(--model); border-radius:12px; padding:10px 14px; font-size:0.8rem; font-weight:700; color:var(--model); display:none;}
+  .ms-model-toggle{background:none; border:none; color:var(--model); font-family:'Fredoka'; font-weight:600; font-size:0.75rem; text-decoration:underline; cursor:pointer; margin-top:8px; padding:0;}
+
+  .total-card{background:linear-gradient(135deg,#FFF7DC,#EAF6F3); border:4px solid var(--amber); border-radius:24px; padding:22px; text-align:center; margin-top:10px;}
+  .total-card .big{font-size:2rem;}
+  .total-card h3{color:var(--teal-deep); margin:6px 0;}
+
+  nav.bottom-nav{position:fixed; bottom:0; left:0; right:0; background:var(--night); display:flex; justify-content:center; gap:4px;
+    padding:10px 6px calc(10px + env(safe-area-inset-bottom)); z-index:10; box-shadow:0 -6px 20px rgba(0,0,0,.15); flex-wrap:wrap;}
+  nav.bottom-nav a{display:flex; flex-direction:column; align-items:center; gap:2px; text-decoration:none; color:#9FC4D6;
+    font-family:'Fredoka'; font-size:0.56rem; font-weight:600; padding:6px 6px; border-radius:14px; min-width:42px;}
+  nav.bottom-nav a .dot{font-size:1.1rem;}
+  nav.bottom-nav a.active{background:var(--sky-deep); color:white;}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="eyebrow">Exam Technique Trainer</span>
+  <h1 class="title">✍️ Answer Like an Examiner Wants</h1>
+  <p class="subtitle">Knowing the facts isn't enough — you need to know what each question is actually asking for, and whether your answer would earn full marks.</p>
+</header>
+
+<div class="stage">
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="words">🔤 Command Words</button>
+    <button class="mode-tab" data-mode="marks">✅ Mark-Scheme Self-Check</button>
+  </div>
+
+  <!-- ===================== COMMAND WORDS ===================== -->
+  <div class="mode-panel active" id="panel-words">
+    <div class="why-box">🔤 Every exam question uses a "command word" that tells you exactly what to do. Mixing these up is one of the easiest ways to lose marks — even with the right content!</div>
+
+    <div class="cw-card">
+      <h2>The Command Word Glossary</h2>
+      <p class="instr">Tap each word to reveal what the examiner wants.</p>
+      <div class="cw-grid" id="cwGrid"></div>
+    </div>
+
+    <div class="cw-card">
+      <h2>🎯 Spot the Command Word</h2>
+      <p class="instr">Read each real exam-style question. What is it actually asking you to do?</p>
+      <div id="cwQuizList"></div>
+      <div class="score-line" id="cwScoreLine"></div>
+    </div>
+  </div>
+
+  <!-- ===================== MARK-SCHEME SELF-CHECK ===================== -->
+  <div class="mode-panel" id="panel-marks">
+    <div class="howmarks">📊 <b>How marks work:</b> a question worth [4] marks usually needs about 4 separate, clearly stated ideas — not one long sentence repeated four ways. Write your answer first, then reveal the marking points and honestly tick off what you actually included.</div>
+    <div id="msList"></div>
+    <div class="total-card" id="msTotalCard" style="display:none;">
+      <div class="big">📈</div>
+      <h3 id="msTotalTitle"></h3>
+      <p id="msTotalText" style="font-weight:700; color:#5b7089;"></p>
+    </div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html"><span class="dot">🏠</span>Home</a>
+  <a href="01_cities_and_people.html"><span class="dot">🏙️</span>Ch1</a>
+  <a href="02_opportunities_challenges.html"><span class="dot">⚖️</span>Ch2</a>
+  <a href="03_case_studies.html"><span class="dot">📖</span>Ch3</a>
+  <a href="04_hazards_and_qol.html"><span class="dot">🛡️</span>Ch4</a>
+  <a href="05_recap.html"><span class="dot">⭐</span>Recap</a>
+  <a href="06_question_bank.html"><span class="dot">📚</span>Bank</a>
+  <a href="07_active_recall.html"><span class="dot">🧠</span>Recall</a>
+  <a class="active" href="08_exam_technique.html"><span class="dot">✍️</span>Exam</a>
+</nav>
+
+<script>
+(function(){
+  /* ================= COMMAND WORD GLOSSARY ================= */
+  const commandWords = [
+    {word:'Define / State', body:'Give the precise meaning of a term, briefly. No explanation or example needed unless asked. E.g. "Define population density."'},
+    {word:'Identify / Name', body:'Pick out and name a specific fact, feature or example — briefly, without describing or explaining it.'},
+    {word:'Describe', body:'Give a detailed account of WHAT something is like — a trend, feature or process — without explaining WHY it happens.'},
+    {word:'Explain', body:'Give reasons or causes — the "why" or "how." Show you understand the process or the link between cause and effect.'},
+    {word:'Compare', body:'Identify BOTH similarities AND differences between two or more things. Missing one side loses marks!'},
+    {word:'Suggest', body:'Propose a sensible, logical idea using your geographical knowledge — useful even for situations you haven\'t directly studied.'},
+    {word:'Calculate', body:'Work out a numerical answer. Show your working and include the correct unit (e.g. people/km²).'},
+    {word:'Using a case study...', body:'Apply a specific real-world example you\'ve studied (e.g. Cape Town, Kranji Reservoir) with named, concrete facts — not a generic answer.'}
+  ];
+  const cwGrid = document.getElementById('cwGrid');
+  commandWords.forEach(cw=>{
+    const flip = document.createElement('div'); flip.className='cw-flip';
+    flip.innerHTML = `<div class="cw-inner">
+      <div class="cw-face cw-front"><span class="word">${cw.word}</span><span class="hint">👆 Tap to reveal</span></div>
+      <div class="cw-face cw-back">${cw.body}</div>
+    </div>`;
+    flip.addEventListener('click', ()=> flip.classList.toggle('flipped'));
+    cwGrid.appendChild(flip);
+  });
+
+  /* ================= SPOT THE COMMAND WORD QUIZ ================= */
+  const catOpts = [
+    'State a fact / give a definition (brief, no explanation)',
+    'Describe a feature or trend (detail, but no reasons)',
+    'Explain why or how (give reasons / causes)',
+    'Compare similarities AND differences',
+    'Suggest a plausible reason (educated guess)',
+    'Calculate a numerical value'
+  ];
+  const cwQuestions = [
+    {q:'"Define the term population density."', correct:0},
+    {q:'"Compare the trend of change in urban population growth across different regions."', correct:3},
+    {q:'"Explain how rapid urban population growth can lead to competition for natural resources."', correct:2},
+    {q:'"Calculate the population density of the location, given its area and population."', correct:5},
+    {q:'"Identify and describe the characteristics of a city."', correct:1},
+    {q:'"Suggest and explain two reasons that contribute to migration."', correct:4},
+    {q:'"Name one urban problem a city is likely to face."', correct:0},
+    {q:'"Describe another method to represent the migration data shown."', correct:1},
+    {q:'"Explain why cities grow so rapidly."', correct:2},
+    {q:'"Compare the population density of two named cities."', correct:3}
+  ];
+  const cwQuizList = document.getElementById('cwQuizList');
+  let cwAnswered=0, cwScore=0;
+  cwQuestions.forEach((rawItem,qi)=>{
+    const opts = catOpts.map((o,i)=>({text:o, isCorrect:i===rawItem.correct}));
+    for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+    const qDiv=document.createElement('div'); qDiv.className='q';
+    const qt=document.createElement('div'); qt.className='qtext'; qt.textContent=(qi+1)+'. '+rawItem.q; qDiv.appendChild(qt);
+    const od=document.createElement('div'); od.className='opts';
+    opts.forEach(opt=>{
+      const btn=document.createElement('button'); btn.className='opt'; btn.textContent=opt.text;
+      btn.addEventListener('click', ()=>{
+        if(btn.disabled) return;
+        const all=od.querySelectorAll('.opt'); all.forEach(o=>o.disabled=true);
+        if(opt.isCorrect){ btn.classList.add('correct'); cwScore++; if(window.CityProgress) window.CityProgress.add(1); }
+        else { btn.classList.add('wrong'); [...all].find((b,i)=>opts[i].isCorrect).classList.add('correct'); }
+        cwAnswered++;
+        if(cwAnswered===cwQuestions.length){ document.getElementById('cwScoreLine').textContent = `Score: ${cwScore} / ${cwQuestions.length}`; }
+      });
+      od.appendChild(btn);
+    });
+    qDiv.appendChild(od); cwQuizList.appendChild(qDiv);
+  });
+
+  /* ================= MARK-SCHEME SELF-CHECK ================= */
+  const msQuestions = [
+    {
+      marks:1, q:'Define the term "population density."', type:'text',
+      points:['Correctly states it is a measure of the number of people living in a given unit area of land.'],
+      model:'Population density is a measurement of the number of people living in a unit area of land.'
+    },
+    {
+      marks:1, q:'Calculate the population density of a location with an area of 3,943 km² and a population of 130,419 people.', type:'calc',
+      answer: 130419/3943, unit:'people/km²',
+      model:'Population density = 130,419 ÷ 3,943 ≈ 33.1 people/km².'
+    },
+    {
+      marks:2, q:'What are hazards?', type:'text',
+      points:['States that hazards are events that negatively impact the physical and/or human environment (flora, fauna, land / people, economy, society).','Notes that hazards can be human-induced (e.g. industrial accidents) or natural (e.g. earthquakes).'],
+      model:'Hazards are events that negatively impact the physical environment (e.g. flora, fauna, land) and human environment (e.g. urban areas, the economy, society). Hazards can be human-induced, caused by human actions or inaction, or induced by nature (natural hazards).'
+    },
+    {
+      marks:2, q:'Explain why cities need to manage hazards.', type:'text',
+      points:['Hazards can quickly become disasters if left unmanaged.','Cities have large populations, high density and large built-up areas, so the impact of a hazard (deaths, injuries, economic loss) is amplified compared to less crowded areas.'],
+      model:'Cities need to manage hazards because hazards can quickly become disasters. Cities are potential disaster zones due to their large population numbers, high population density and large built-up areas, which means the human and economic cost of an unmanaged hazard can be very high.'
+    },
+    {
+      marks:3, q:'Identify and describe the characteristics of a city.', type:'text',
+      points:['Large population size.','High population density.','Extensive urban built-up area.','A wide variety of functions and services (any 3 of these 4 for full marks).'],
+      model:'A city has a large population size, high population density, an extensive urban built-up area, and a wide variety of functions and services — all greater than what is typically found in rural areas.'
+    },
+    {
+      marks:2, q:'Describe two functions you would find in a city but not in a rural area.', type:'text',
+      points:['Names one specific complex urban function (e.g. universities/higher education, large shopping malls, specialised hospitals, entertainment complexes).','Names a second, different specific complex urban function.'],
+      model:'Cities have institutes of higher learning such as universities and polytechnics, and large shopping malls with a wide range of goods — both of which are uncommon in rural areas, which typically only have simple provision shops and basic schools.'
+    },
+    {
+      marks:4, q:'Choose the two most important characteristics needed to build an environmentally sustainable community, and explain your answer.', type:'text',
+      points:['Clearly identifies two specific characteristics (e.g. "clean air and comfortable temperatures" and "flexible and environmentally sustainable" services).','Explains why the first characteristic matters for environmental sustainability.','Explains why the second characteristic matters for environmental sustainability.','Answer is specifically linked to sustainability/environment, not just general comfort or convenience.'],
+      model:'Two important characteristics are (1) clean air and comfortable temperatures, and (2) flexible and environmentally sustainable services. Clean air allows people to enjoy outdoor activities and lead a healthy lifestyle, contributing to environmental sustainability. Flexible, environmentally sustainable services help reduce carbon emissions and the community\'s overall environmental footprint, helping to reduce the effects of climate change.'
+    },
+    {
+      marks:4, q:'Explain why cities grow so rapidly.', type:'text',
+      points:['Cities have a concentration of institutes of higher learning/specialised education, attracting people to migrate for training and skills.','Businesses offer a wide variety of good employment opportunities with better pay, improving workers\' and their families\' well-being.','Cities are attractive places to live, drawing migrants seeking a better quality of life.','Cities are hubs for technological innovation, creating a cycle of opportunity that keeps attracting more people and fuelling further growth.'],
+      model:'Cities grow rapidly because they have a concentration of institutes of higher learning that develop a skilled workforce, and businesses that offer a wide variety of employment opportunities with good pay, improving the well-being of workers and their families. Cities are also attractive places to live and are hubs for technological innovation, offering new opportunities that continue to draw in more migrants — fuelling further rapid growth.'
+    }
+  ];
+
+  const msList = document.getElementById('msList');
+  let totalMarksEarned = 0;
+  const totalPossible = msQuestions.reduce((s,q)=>s+q.marks,0);
+  let calcCorrectCount = 0;
+  const calcTotal = msQuestions.filter(q=>q.type==='calc').length;
+
+  function updateTotalCard(){
+    const shown = document.querySelectorAll('.ms-scheme[data-opened="1"]').length + calcCorrectCount;
+    // compute earned marks from checked boxes + calc answers
+    let earned = 0;
+    document.querySelectorAll('.ms-scheme').forEach(scheme=>{
+      earned += scheme.querySelectorAll('input[type=checkbox]:checked').length;
+    });
+    document.querySelectorAll('.ms-calc-correct').forEach(el=>{ earned += parseInt(el.dataset.marks,10); });
+    totalMarksEarned = earned;
+    document.getElementById('msTotalCard').style.display = 'block';
+    document.getElementById('msTotalTitle').textContent = `${totalMarksEarned} / ${totalPossible} marks self-assessed`;
+    const pct = Math.round((totalMarksEarned/totalPossible)*100);
+    document.getElementById('msTotalText').textContent = pct>=80
+      ? "Excellent — your answers are hitting the marking points well!"
+      : pct>=50
+      ? "Decent start — check which specific points you're missing and try rewriting those answers."
+      : "Keep practising — re-read the model answers and notice which distinct points they make.";
+  }
+
+  msQuestions.forEach((item, qi)=>{
+    const card = document.createElement('div'); card.className='ms-card';
+    card.innerHTML = `
+      <div class="ms-meta">
+        <span class="ms-tag">Question ${qi+1}</span>
+        <span class="ms-marks">[${item.marks} mark${item.marks>1?'s':''}]</span>
+      </div>
+      <div class="ms-qtext">${item.q}</div>
+    `;
+    if(item.type==='text'){
+      const ta = document.createElement('textarea'); ta.placeholder='Type your answer here...';
+      card.appendChild(ta);
+      const revealBtn = document.createElement('button'); revealBtn.className='ms-reveal'; revealBtn.textContent='Reveal Marking Points ✅';
+      card.appendChild(revealBtn);
+      const scheme = document.createElement('div'); scheme.className='ms-scheme';
+      scheme.innerHTML = `<span class="tag">Tick off what you actually included — be honest!</span>`;
+      item.points.forEach(p=>{
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox"><span>${p}</span>`;
+        label.querySelector('input').addEventListener('change', ()=>{ updateTotalCard(); if(window.CityProgress) window.CityProgress.add(1); });
+        scheme.appendChild(label);
+      });
+      const modelBtn = document.createElement('button'); modelBtn.className='ms-model-toggle'; modelBtn.textContent='Show full model answer';
+      const model = document.createElement('div'); model.className='ms-model'; model.innerHTML = `<b>🔵 Model Answer:</b> ${item.model}`;
+      modelBtn.addEventListener('click', ()=>{
+        const showing = model.style.display==='block';
+        model.style.display = showing ? 'none' : 'block';
+        modelBtn.textContent = showing ? 'Show full model answer' : 'Hide model answer';
+      });
+      scheme.appendChild(modelBtn); scheme.appendChild(model);
+      card.appendChild(scheme);
+      revealBtn.addEventListener('click', ()=>{
+        const showing = scheme.style.display==='block';
+        scheme.style.display = showing ? 'none' : 'block';
+        scheme.dataset.opened = showing ? '0' : '1';
+        revealBtn.textContent = showing ? 'Reveal Marking Points ✅' : 'Hide Marking Points';
+        updateTotalCard();
+      });
+    } else if(item.type==='calc'){
+      const row = document.createElement('div'); row.className='ms-calc-row';
+      const input = document.createElement('input'); input.type='number'; input.placeholder='Your answer';
+      const unit = document.createElement('span'); unit.textContent = item.unit;
+      const checkBtn = document.createElement('button'); checkBtn.className='ms-calc-check'; checkBtn.textContent='Check';
+      row.appendChild(input); row.appendChild(unit); row.appendChild(checkBtn);
+      card.appendChild(row);
+      const fb = document.createElement('div'); fb.className='ms-calc-fb'; card.appendChild(fb);
+      let done=false;
+      checkBtn.addEventListener('click', ()=>{
+        const val = parseFloat(input.value);
+        if(isNaN(val)){ fb.textContent='Type a number first!'; fb.style.color='var(--coral-deep)'; return; }
+        const isRight = Math.abs(val - item.answer) < 1;
+        if(isRight){
+          fb.textContent = `✅ Correct! ≈ ${item.answer.toFixed(1)} ${item.unit}`;
+          fb.style.color='var(--green-deep)';
+          if(!done){ done=true; calcCorrectCount++; const marker=document.createElement('span'); marker.className='ms-calc-correct'; marker.dataset.marks=item.marks; marker.style.display='none'; card.appendChild(marker); if(window.CityProgress) window.CityProgress.add(item.marks); updateTotalCard(); }
+        } else {
+          fb.textContent = `Not quite. Correct answer ≈ ${item.answer.toFixed(1)} ${item.unit} — check "Show working" below.`;
+          fb.style.color='var(--coral-deep)';
+        }
+      });
+      const modelBtn = document.createElement('button'); modelBtn.className='ms-model-toggle'; modelBtn.textContent='Show working';
+      const model = document.createElement('div'); model.className='ms-model'; model.innerHTML = `<b>🔵 Model Answer:</b> ${item.model}`;
+      modelBtn.addEventListener('click', ()=>{
+        const showing = model.style.display==='block';
+        model.style.display = showing ? 'none' : 'block';
+        modelBtn.textContent = showing ? 'Show working' : 'Hide working';
+      });
+      card.appendChild(modelBtn); card.appendChild(model);
+    }
+    msList.appendChild(card);
+  });
+
+  /* ================= TABS ================= */
+  document.querySelectorAll('.mode-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-'+tab.dataset.mode).classList.add('active');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
